@@ -31,9 +31,9 @@ for member in members:
         os.makedirs(folder)
 
 # ------------------------------
-# 爬蟲抓照片
+# 爬蟲抓照片 (最多2張)
 # ------------------------------
-def fetch_images_google(member, limit=5):
+def fetch_images_google(member, limit=2):
     headers = {"User-Agent": "Mozilla/5.0"}
     query = f"IVE {member} site:twitter.com OR site:instagram.com OR site:google.com"
     search_url = f"https://www.google.com/search?tbm=isch&q={query}"
@@ -43,11 +43,10 @@ def fetch_images_google(member, limit=5):
         imgs = soup.find_all("img")
         urls = [img['src'] for img in imgs if img.get('src')][:limit]
         return urls
-    except Exception as e:
-        st.error(f"{member} 抓圖錯誤: {e}")
+    except:
         return []
 
-def download_images(member, limit=5):
+def download_images(member, limit=2):
     folder = os.path.join(base_dir, member)
     existing = len(os.listdir(folder))
     if existing >= limit:
@@ -66,9 +65,9 @@ def download_images(member, limit=5):
 # ------------------------------
 st.header("📥 第一次使用請按下按鈕抓取 IVE 成員照片")
 if st.button("開始抓取所有成員照片"):
-    with st.spinner("正在從 Google 抓取 IVE 成員照片，請稍等 20–40 秒..."):
+    with st.spinner("正在抓取照片，請稍等 10~20 秒..."):
         for member in members:
-            download_images(member, limit=5)
+            download_images(member, limit=2)
     st.success("🎉 成員照片下載完成！")
 
 # ------------------------------
@@ -149,34 +148,37 @@ st.write("系統隨機抽一張團員照片，猜這是誰！")
 
 valid_members = [m for m in members if len(os.listdir(os.path.join(base_dir, m))) > 0]
 
-if "game_member" not in st.session_state:
-    st.session_state.game_member = random.choice(valid_members)
+if valid_members:
+    if "game_member" not in st.session_state:
+        st.session_state.game_member = random.choice(valid_members)
 
-game_member = st.session_state.game_member
-member_imgs = os.listdir(os.path.join(base_dir, game_member))
-game_img_name = random.choice(member_imgs)
-game_img_path = os.path.join(base_dir, game_member, game_img_name)
-game_image = Image.open(game_img_path).convert("RGB")
-st.image(game_image, caption="猜猜這是誰？", use_column_width=True)
+    game_member = st.session_state.game_member
+    member_imgs = os.listdir(os.path.join(base_dir, game_member))
+    game_img_name = random.choice(member_imgs)
+    game_img_path = os.path.join(base_dir, game_member, game_img_name)
+    game_image = Image.open(game_img_path).convert("RGB")
+    st.image(game_image, caption="猜猜這是誰？", use_column_width=True)
 
-# 下拉選單
-user_guess = st.selectbox("選擇你認為這是哪位成員：", members)
+    # 下拉選單
+    user_guess = st.selectbox("選擇你認為這是哪位成員：", members)
 
-if st.button("提交猜測"):
-    ai_pred = predict_member(cv2.cvtColor(np.array(game_image), cv2.COLOR_RGB2BGR))
-    st.write(f"使用者猜測：{user_guess}")
-    st.write(f"AI 預測：{ai_pred}")
-    st.write(f"正確答案：{game_member}")
+    if st.button("提交猜測"):
+        ai_pred = predict_member(cv2.cvtColor(np.array(game_image), cv2.COLOR_RGB2BGR))
+        st.write(f"使用者猜測：{user_guess}")
+        st.write(f"AI 預測：{ai_pred}")
+        st.write(f"正確答案：{game_member}")
 
-    if user_guess == game_member:
-        st.success("🎉 你猜對了！")
-    else:
-        st.error("❌ 你猜錯了")
+        if user_guess == game_member:
+            st.success("🎉 你猜對了！")
+        else:
+            st.error("❌ 你猜錯了")
 
-    if ai_pred.lower() == game_member.lower():
-        st.info("AI 預測正確 ✅")
-    else:
-        st.warning("AI 預測錯誤 ⚠️")
+        if ai_pred.lower() == game_member.lower():
+            st.info("AI 預測正確 ✅")
+        else:
+            st.warning("AI 預測錯誤 ⚠️")
 
-    # 重新選擇下一張遊戲圖片
-    st.session_state.game_member = random.choice(valid_members)
+        # 重新選擇下一張遊戲圖片
+        st.session_state.game_member = random.choice(valid_members)
+else:
+    st.warning("目前沒有任何團員照片，請先按上方按鈕下載照片。")
