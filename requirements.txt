@@ -15,3 +15,5 @@ Pillow
 
 # Optional: if InsightFace 使用到（雖然很多環境有內建）
 scikit-learn
+
+FaceAnalysis
