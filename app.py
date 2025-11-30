@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 # ------------------------------
 st.set_page_config(page_title="IVE AI PK Demo", layout="wide")
 st.title("🎤 IVE AI PK Demo")
-st.write("使用 InsightFace 模型辨識 IVE 成員，並自動抓取照片")
+st.write("使用 InsightFace 辨識 IVE 成員並進行 PK 遊戲")
 
 # ------------------------------
 # 成員列表與資料夾設定
@@ -34,12 +34,10 @@ for member in members:
 # 爬蟲抓照片
 # ------------------------------
 def fetch_images_google(member, limit=20):
-    """
-    使用 Google 搜尋自動抓取照片
-    """
     headers = {"User-Agent": "Mozilla/5.0"}
     query = f"IVE {member} site:twitter.com OR site:instagram.com OR site:google.com"
     search_url = f"https://www.google.com/search?tbm=isch&q={query}"
+
     try:
         res = requests.get(search_url, headers=headers, timeout=10)
         soup = BeautifulSoup(res.text, "html.parser")
@@ -54,8 +52,8 @@ def download_images(member, limit=20):
     folder = os.path.join(base_dir, member)
     existing = len(os.listdir(folder))
     if existing >= limit:
-        return  # 已有足夠照片
-    st.info(f"正在抓取 {member} 照片...")
+        return
+
     urls = fetch_images_google(member, limit)
     for i, url in enumerate(urls):
         try:
@@ -66,10 +64,15 @@ def download_images(member, limit=20):
             continue
 
 # ------------------------------
-# 執行自動抓照片
+# 第一次使用：按按鈕抓取所有照片
 # ------------------------------
-for member in members:
-    download_images(member, limit=20)
+st.header("📥 第一次使用請按下按鈕抓取 IVE 成員照片")
+
+if st.button("開始抓取所有成員照片"):
+    with st.spinner("正在從 Google 自動抓取 IVE 成員照片，請稍等 20–40 秒..."):
+        for member in members:
+            download_images(member, limit=20)
+    st.success("🎉 成員照片下載完成！你現在可以使用辨識與遊戲功能了。")
 
 # ------------------------------
 # 初始化 InsightFace
@@ -107,13 +110,16 @@ def predict_member(img):
     faces = app.get(img)
     if len(faces) == 0:
         return "無法偵測到臉"
+
     query_emb = faces[0].embedding
     scores = {}
+
     for member, embs in face_db.items():
         if len(embs) == 0:
             continue
-        sims = [np.dot(query_emb, e)/(norm(query_emb)*norm(e)) for e in embs]
+        sims = [np.dot(query_emb, e) / (norm(query_emb) * norm(e)) for e in embs]
         scores[member] = np.mean(sims)
+
     return max(scores, key=scores.get)
 
 # ------------------------------
@@ -124,17 +130,19 @@ cols = st.columns(len(members))
 for i, member in enumerate(members):
     folder = os.path.join(base_dir, member)
     imgs = os.listdir(folder)
+
     if len(imgs) > 0:
         img_path = os.path.join(folder, imgs[0])
         cols[i].image(img_path, caption=member, use_column_width=True)
     else:
-        cols[i].write(f"{member} (無照片)")
+        cols[i].write(f"{member}（無照片，請先抓取）")
 
 # ------------------------------
 # 2️⃣ 即時辨識區
 # ------------------------------
 st.header("📸 上傳照片進行辨識")
-uploaded_file = st.file_uploader("選擇一張圖片", type=["jpg","jpeg","png"])
+uploaded_file = st.file_uploader("選擇一張圖片", type=["jpg", "jpeg", "png"])
+
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
@@ -148,27 +156,38 @@ st.header("🎮 AI PK 遊戲")
 st.write("系統隨機抽一張團員照片，猜這是誰！")
 
 valid_members = [m for m in members if len(os.listdir(os.path.join(base_dir, m))) > 0]
+
 if len(valid_members) > 0:
+
     game_member = random.choice(valid_members)
     member_imgs = os.listdir(os.path.join(base_dir, game_member))
     game_img_name = random.choice(member_imgs)
     game_img_path = os.path.join(base_dir, game_member, game_img_name)
     game_image = Image.open(game_img_path).convert("RGB")
-    st.image(game_image, caption="猜猜這是誰?", use_column_width=True)
 
-    user_guess = st.text_input("輸入你的猜測 (英文名字)")
+    st.image(game_image, caption="猜猜這是誰？", use_column_width=True)
+
+    # 下拉式選單（取代輸入文字）
+    user_guess = st.selectbox("選擇你認為這是哪位成員：", members)
+
     if st.button("提交猜測"):
-        ai_pred = predict_member(cv2.cvtColor(np.array(game_image), cv2.COLOR_RGB2BGR))
+        ai_pred = predict_member(
+            cv2.cvtColor(np.array(game_image), cv2.COLOR_RGB2BGR)
+        )
+
         st.write(f"使用者猜測：{user_guess}")
         st.write(f"AI 預測：{ai_pred}")
         st.write(f"正確答案：{game_member}")
-        if user_guess.strip().lower() == game_member.lower():
+
+        if user_guess == game_member:
             st.success("🎉 你猜對了！")
         else:
             st.error("❌ 你猜錯了")
+
         if ai_pred.lower() == game_member.lower():
             st.info("AI 預測正確 ✅")
         else:
             st.warning("AI 預測錯誤 ⚠️")
+
 else:
-    st.warning("目前沒有任何團員照片，請先放入照片以啟動遊戲功能。")
+    st.warning("目前沒有任何團員照片，請先按上方按鈕下載照片。")
