@@ -1,9 +1,17 @@
 streamlit
-insightface
-opencv-python-headless
-numpy
-onnxruntime
-pillow
-scikit-learn
-beautifulsoup4
+
+# For image scraping & HTTP
 requests
+beautifulsoup4
+
+# For face recognition (InsightFace)
+insightface
+onnxruntime
+opencv-python-headless
+
+# Image processing
+numpy
+Pillow
+
+# Optional: if InsightFace 使用到（雖然很多環境有內建）
+scikit-learn
