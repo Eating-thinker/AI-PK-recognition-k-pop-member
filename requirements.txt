@@ -5,3 +5,5 @@ numpy
 onnxruntime
 pillow
 scikit-learn
+beautifulsoup4
+requests
