@@ -35,7 +35,7 @@
 
 1. **訪問 Demo**  
    - 點擊以下連結即可直接體驗：  
-   [IVE AI PK Demo](https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/)
+   [IVE AI PK Demo]([https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/](https://ai-pk-recognition-k-pop-member-56szmhdqpdtztcpssy92xg.streamlit.app/))
 
 2. **上傳照片辨識**  
    - 點擊「選擇一張圖片」上傳圖片（jpg/jpeg/png）。
@@ -92,4 +92,4 @@ AI-PK-recognition-k-pop-member/
 
 ## Demo 連結
 
-[https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/](https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/)
+[https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/]([https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/](https://ai-pk-recognition-k-pop-member-56szmhdqpdtztcpssy92xg.streamlit.app/))
