@@ -92,4 +92,5 @@ AI-PK-recognition-k-pop-member/
 
 ## Demo 連結
 
-[https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/]([https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/](https://ai-pk-recognition-k-pop-member-56szmhdqpdtztcpssy92xg.streamlit.app/))
+[https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/](https://ai-pk-recognition-k-pop-member-9g9nbw9uu5ngnmdp6objcg.streamlit.app/)
+
